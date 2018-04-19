@@ -1,0 +1,12 @@
+"*":
+  autosave:
+    enabled: true
+  core:
+    autoHideMenuBar: true
+    telemetryConsent: "no"
+  "exception-reporting":
+    userId: "f2d97742-b9d3-424a-82b3-4984b5c40a10"
+  tabs:
+    enableVcsColoring: true
+  welcome:
+    showOnStartup: false
