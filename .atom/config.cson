@@ -4,6 +4,15 @@
   core:
     autoHideMenuBar: true
     telemetryConsent: "no"
+    themes: [
+      "one-dark-ui"
+      "solarized-dark-syntax"
+    ]
+    useTreeSitterParsers: true
+  editor:
+    showInvisibles: true
+    softWrap: true
+    softWrapAtPreferredLineLength: true
   "exception-reporting":
     userId: "f2d97742-b9d3-424a-82b3-4984b5c40a10"
   tabs:
