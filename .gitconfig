@@ -1,0 +1,32 @@
+[user]
+	name = Erik Nilsen
+	email = enilsen16@live.com
+[alias]
+  ll = log --pretty=format:'%Cred%h %>(11,trunc)%Cgreen%cr %<(10,trunc)%Cblue%cn%C(yellow)%d %Creset%s'
+	ir = !sh -c 'git rebase --interactive origin/${1-master}' -
+	rmb = !sh -c 'git branch -D $1 && git push origin :$1' -
+	st = status --short --branch
+	co = checkout
+	br = branch
+	df = diff HEAD
+	la = log --patch --stat --pretty=format:'%C(bold red)%h %Cgreen%cr %Cblue%cn%C(yellow)%d %Creset%s'
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+	upstream = cyan
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	func = normal bold
+[color "status"]
+	added = green bold
+	changed = yellow bold
+	untracked = cyan bold
+	branch = yellow
+[push]
+	default = simple
+[core]
+	excludesfile = ~/.gitignore
