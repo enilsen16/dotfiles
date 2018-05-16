@@ -100,3 +100,5 @@ source $ZSH/oh-my-zsh.sh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 eval "$(direnv hook zsh)"
+
+DOTNET_CLI_TELEMETRY_OPTOUT=true

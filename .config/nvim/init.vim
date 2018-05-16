@@ -1,5 +1,4 @@
 scriptencoding utf-8
-" Erik's neovim config
 
 " Table of Contents
 " 1) Basics #basics
@@ -29,12 +28,14 @@ set shiftwidth=2
 
 """ Format Options #format-options
 set formatoptions=tcrq
+set wrap
+set linebreak
 set textwidth=100
 
 """ Leader #leader
 " Use space for leader
 let g:mapleader=' '
-" Double backslash for local leader - FIXME: not sure I love this
+" Double backslash for local leader
 let g:maplocalleader='\\'
 
 """ omni #omni
@@ -42,8 +43,13 @@ let g:maplocalleader='\\'
 set omnifunc=syntaxcomplete#Complete
 
 """ UI Basics #ui-basics
+" turn off mouse
+set mouse=""
 
-set cursorline
+" NOTE: I stopped highlighting cursor position because it makes redrawing
+" super slow.
+" set cursorline
+" set cursorcolumn
 
 " Highlight search results
 set hlsearch
@@ -60,42 +66,57 @@ set title
 " Line numbering
 set number
 
-" Clipboard
-set clipboard=unnamed
-
 """ Undo #undo
 " undofile - This allows you to use undos after exiting and restarting
 " This, like swap and backups, uses .vim-undo first, then ~/.vim/undo
 " :help undo-persistence
 " This is only present in 7.3+
+if isdirectory($HOME . '/.config/nvim/undo') == 0
+  :silent !mkdir -p ~/.config/nvim/undo > /dev/null 2>&1
+endif
+set undodir=./.vim-undo//
+set undodir+=~/.vim/undo//
 set undofile
-set undolevels=5000
 
 """""""""""""" End Basics
 
 """""""""""""" Plugins #plugins
 call plug#begin()
 
-Plug 'benmills/vimux'
-Plug 'spiegela/vimix'
-  let g:vimix_map_keys = 1
-
 """ Filetypes #filetypes
 " Polyglot loads language support on demand!
 Plug 'sheerun/vim-polyglot'
   let g:polyglot_disabled = ['elm']
 
+" HTML / JS / CSS
+Plug 'othree/html5.vim'
+Plug 'vim-scripts/html-improved-indentation'
+Plug 'pangloss/vim-javascript'
+  let g:javascript_plugin_flow = 1
+Plug 'mxw/vim-jsx'
+  let g:jsx_ext_required = 0
+
+"Plug 'flowtype/vim-flow'
+Plug 'carlosrocha/vim-flow-plus'
+Plug 'wokalski/autocomplete-flow'
+" For func argument completion
+Plug 'Shougo/neosnippet'
+Plug 'Shougo/neosnippet-snippets'
+" Automatically imports missing JS dependencies and removes unused ones.
+Plug 'karthikv/tradeship-vim'
+
 " Elixir
+Plug 'elixir-lang/vim-elixir'
 Plug 'slashmili/alchemist.vim'
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  let g:deoplete#enable_at_startup = 1
-  if !exists('g:deoplete#omni#input_patterns')
-    let g:deoplete#omni#input_patterns = {}
-  endif
-  let g:deoplete#disable_auto_complete = 1
-  autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
-  " deoplete tab-complete
-  inoremap <expr><tab> pumvisible()? "\<c-n>" : "\<tab>"
+
+""" Add support for ANSI colors - this has variously been necessary and caused
+""" problems, no clue what's up there...
+Plug 'powerman/vim-plugin-AnsiEsc'
+
+" sh
+" Plug 'z0mbix/vim-shfmt', { 'for': 'sh' }
+"   let g:shfmt_fmt_on_save = 1
+"   let g:shfmt_extra_args = '-i 2'
 
 " Phoenix
 Plug 'c-brenn/phoenix.vim'
@@ -104,10 +125,49 @@ Plug 'tpope/vim-projectionist' " required for some navigation features
 " Elm
 Plug 'ElmCast/elm-vim'
   let g:elm_format_autosave = 1
+  let g:elm_detailed_complete = 1
+  let g:elm_syntastic_show_warnings = 1
+  let g:elm_format_fail_silently = 0
+  let g:elm_browser_command = 'open'
+  let g:elm_make_show_warnings = 1
+  let g:elm_setup_keybindings = 1
 
-Plug 'tomlion/vim-solidity'
+" Fuse
+Plug 'BeeWarloc/vim-fuse'
+
+" Markdown
+function! NpmInstallAndUpdateRemotePlugins(info)
+  !npm install
+  UpdateRemotePlugins
+endfunction
+Plug 'neovim/node-host', { 'do': function('NpmInstallAndUpdateRemotePlugins') }
+" Plug 'vimlab/mdown.vim', { 'do': function('NpmInstallAndUpdateRemotePlugins') }
 
 """ Utilities #utilities
+" Enable opening a file to a given line with file:lineno
+Plug 'bogado/file-line'
+
+" Easily toggle quickfix and locations lists with <leader>l and <leader>q
+Plug 'milkypostman/vim-togglelist'
+
+" Reformat source code
+Plug 'sbdchd/neoformat'
+
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+  let g:deoplete#enable_at_startup = 1
+  let g:deoplete#sources = {}
+  let g:deoplete#sources._ = ['file', 'neosnippet']
+  let g:deoplete#omni#functions = {}
+  let g:deoplete#omni#input_patterns = {}
+
+  " Elm support
+  " h/t https://github.com/ElmCast/elm-vim/issues/52#issuecomment-264161975
+  let g:deoplete#sources.elm = ['omni'] + g:deoplete#sources._
+  let g:deoplete#omni#functions.elm = ['elm#Complete']
+  let g:deoplete#omni#input_patterns.elm = '[^ \t]+'
+  let g:deoplete#disable_auto_complete = 1
+
+Plug 'ervandew/supertab'
 
 " Add comment textobjects (I really want to reformat comments without affecting
 " the next line of code)
@@ -118,7 +178,6 @@ Plug 'kana/vim-textobj-user' | Plug 'glts/vim-textobj-comment'
 Plug 'editorconfig/editorconfig-vim'
   let g:EditorConfig_exclude_patterns = ['fugitive://.*']
   let g:EditorConfig_core_mode = 'external_command'
-  let g:EditorConfig_verbose=1
 
 " Jump between quicklist, location (syntastic, etc) items with ease, among other things
 Plug 'tpope/vim-unimpaired'
@@ -126,6 +185,38 @@ Plug 'tpope/vim-unimpaired'
 " Line commenting
 Plug 'tomtom/tcomment_vim'
   " By default, `gc` will toggle comments
+
+Plug 'janko-m/vim-test'                " Run tests with varying granularity
+  nmap <silent> <leader>t :TestNearest<CR>
+  nmap <silent> <leader>T :TestFile<CR>
+  nmap <silent> <leader>a :TestSuite<CR>
+  nmap <silent> <leader>l :TestLast<CR>
+  nmap <silent> <leader>g :TestVisit<CR>
+  " run tests in neoterm
+  let g:test#strategy = 'neoterm'
+
+Plug 'ntpeters/vim-better-whitespace'
+
+" Asynchronous file linter
+Plug 'w0rp/ale'
+  " wait a bit before checking syntax in a file, if typing
+  let g:ale_lint_delay = 5000
+  " Use global eslint
+  " let g:ale_javascript_eslint_use_global = 1
+  " Only use es6 for js
+  "let g:ale_linters = {'javascript': ['eslint'], 'javascript.jsx': ['eslint']}
+  "let g:ale_linters = {'javascript': ['eslint', 'flow', 'xo']}
+  let g:ale_linters = {'javascript': ['flow']}
+  let g:ale_lint_on_save = 0
+	let g:ale_lint_on_text_changed = 0
+  " let g:ale_fixers = {
+  " \   'javascript': [
+  " \       'eslint',
+  " \   ],
+  " \}
+
+" Coala integration
+"Plug 'coala/coala-vim'
 
 " git support from dat tpope
 Plug 'tpope/vim-fugitive'
@@ -149,56 +240,102 @@ Plug 'mattn/gist-vim'
 Plug 'sjl/gundo.vim'
   nnoremap <F5> :GundoToggle<CR>
 
-Plug 'lepoetemaudit/alpaca_vim'
-Plug 'jakwings/vim-pony'
-Plug 'ntpeters/vim-better-whitespace'
+" universal text linking
+Plug 'vim-scripts/utl.vim'
 
-Plug 'rust-lang/rust.vim'
-  let g:rustfmt_autosave = 1
+" allow portions of a file to use different syntax
+Plug 'vim-scripts/SyntaxRange'
+
+" increment dates like other items
+Plug 'tpope/vim-speeddating'
+
+" nicer api for neovim terminal
+Plug 'kassio/neoterm'
+
+Plug 'benmills/vimux'
+Plug 'spiegela/vimix'
+let g:vimix_map_keys = 1
 
 """ UI Plugins #ui-plugins
+
 Plug 'iCyMind/NeoSolarized'
+
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+  let g:airline_theme = 'solarized'
+  let g:bufferline_echo = 0
+  let g:airline_powerline_fonts=0
+  let g:airline_enable_branch=1
+  let g:airline_enable_syntastic=1
+  let g:airline_branch_prefix = '⎇ '
+  let g:airline_paste_symbol = '∥'
+  let g:airline#extensions#tabline#enabled = 0
+  let g:airline#extensions#ale#enabled = 1
 
 """ Code Navigation #code-navigation
 " fzf fuzzy finder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
   let g:fzf_layout = { 'window': 'enew' }
-  let g:fzf_layout = { 'window': '-tabnew' }
-  " Customize fzf colors to match your color scheme
-  let g:fzf_colors =
-    \ { 'fg':      ['fg', 'Normal'],
-    \ 'bg':      ['bg', 'Normal'],
-    \ 'hl':      ['fg', 'Comment'],
-    \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-    \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-    \ 'hl+':     ['fg', 'Statement'],
-    \ 'info':    ['fg', 'PreProc'],
-    \ 'prompt':  ['fg', 'Conditional'],
-    \ 'pointer': ['fg', 'Exception'],
-    \ 'marker':  ['fg', 'Keyword'],
-    \ 'spinner': ['fg', 'Label'],
-    \ 'header':  ['fg', 'Comment'] }
   nnoremap <silent> <C-P> :FZF<cr>
   nnoremap <silent> <leader>a :Ag<cr>
   augroup localfzf
     autocmd!
     autocmd FileType fzf :tnoremap <buffer> <C-J> <C-J>
     autocmd FileType fzf :tnoremap <buffer> <C-K> <C-K>
+    autocmd VimEnter * command! -bang -nargs=* Ag
+      \ call fzf#vim#ag(<q-args>,
+      \                 <bang>0 ? fzf#vim#with_preview('up:60%')
+      \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
+      \                 <bang>0)
   augroup END
 
 " Open files where you last left them
 Plug 'dietsche/vim-lastplace'
 
-Plug 'jiangmiao/auto-pairs'
-Plug 'tpope/vim-ragtag'
+" Execute code checks, find mistakes, in the background
+" Plug 'neomake/neomake'
+"   " Run Neomake when I save any buffer
+"   augroup localneomake
+"     autocmd! BufWritePost * Neomake
+"   augroup END
+"   " Don't tell me to use smartquotes in markdown ok?
+"   let g:neomake_markdown_enabled_makers = []
+"
+"   " Configure a nice credo setup, courtesy https://github.com/neomake/neomake/pull/300
+"   let g:neomake_elixir_enabled_makers = ['mix', 'mycredo']
+"   function! NeomakeCredoErrorType(entry)
+"     if a:entry.type ==# 'F'      " Refactoring opportunities
+"       let l:type = 'W'
+"     elseif a:entry.type ==# 'D'  " Software design suggestions
+"       let l:type = 'I'
+"     elseif a:entry.type ==# 'W'  " Warnings
+"       let l:type = 'W'
+"     elseif a:entry.type ==# 'R'  " Readability suggestions
+"       let l:type = 'I'
+"     elseif a:entry.type ==# 'C'  " Convention violation
+"       let l:type = 'W'
+"     else
+"       let l:type = 'M'           " Everything else is a message
+"     endif
+"     let a:entry.type = l:type
+"   endfunction
+"
+"   let g:neomake_elixir_mycredo_maker = {
+"         \ 'exe': 'mix',
+"         \ 'args': ['credo', 'list', '%:p', '--format=oneline'],
+"         \ 'errorformat': '[%t] %. %f:%l:%c %m,[%t] %. %f:%l %m',
+"         \ 'postprocess': function('NeomakeCredoErrorType')
+"         \ }
+
+" Easily manage tags files
+Plug 'ludovicchabant/vim-gutentags'
+  let g:gutentags_cache_dir = '~/.tags_cache'
 
 " navigate up a directory with '-' in netrw, among other things
 Plug 'tpope/vim-vinegar'
 
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-  let g:airline_solarized_bg='dark'
+Plug 'iwataka/airnote.vim', { 'on': ['Note', 'NoteDelete'] }
 
 Plug 'airblade/vim-gitgutter'
 
@@ -211,17 +348,22 @@ Plug 'scrooloose/nerdtree'
 
 Plug 'Xuyuanp/nerdtree-git-plugin'
 
-Plug 'w0rp/ale'
-
-
 call plug#end()
+
+"" Plugin configuration that has to run after plug#end
+
 """""""""""""" End Plugins
+
 
 """""""""""""" UI Tweaks #ui-tweaks
 """ Theme #theme
-syntax enable
+if (empty($TMUX))
+  if (has('termguicolors'))
+    set termguicolors
+  endif
+endif
 
-" set termguicolors
+syntax enable
 
 " default value is "normal", Setting this option to "high" or "low" does use the
 " same Solarized palette but simply shifts some values up or down in order to
@@ -247,11 +389,16 @@ set background=dark
 
 colorscheme NeoSolarized
 
-
 """ Keyboard
 " Remove highlights
 " Clear the search buffer when hitting return
 nnoremap <silent> <cr> :nohlsearch<cr>
+
+" NO ARROW KEYS COME ON
+map <Left>  :echo "no!"<cr>
+map <Right> :echo "no!"<cr>
+map <Up>    :echo "no!"<cr>
+map <Down>  :echo "no!"<cr>
 
 " Custom split opening / closing behaviour
 map <C-N> :vsp<CR><C-P>
@@ -276,6 +423,41 @@ map ,, <C-^>
 set iskeyword+=-
 
 """ Auto Commands ====================== #auto-cmd
+
+" A helper function to restore cursor position, window position, and last search
+" after running a command.  From:
+" http://stackoverflow.com/questions/15992163/how-to-tell-vim-to-auto-indent-before-saving
+function! Preserve(command)
+  " Save the last search.
+  let search = @/
+
+  " Save the current cursor position.
+  let cursor_position = getpos('.')
+
+  " Save the current window position.
+  normal! H
+  let window_position = getpos('.')
+  call setpos('.', cursor_position)
+
+  " Execute the command.
+  execute a:command
+
+  " Restore the last search.
+  let @/ = search
+
+  " Restore the previous window position.
+  call setpos('.', window_position)
+  normal! zt
+
+  " Restore the previous cursor position.
+  call setpos('.', cursor_position)
+endfunction
+
+" Re-indent the whole buffer.
+function! Indent()
+  call Preserve('normal gg=G')
+endfunction
+
 """"" Filetypes ========================
 augroup erlang
   autocmd!
@@ -284,6 +466,17 @@ augroup erlang
   autocmd BufNewFile,BufRead *.erl setlocal softtabstop=4
   autocmd BufNewFile,BufRead relx.config setlocal filetype=erlang
 augroup END
+
+" augroup elixir
+"   autocmd!
+"   " autocmd BufWritePre *.ex call Indent()
+"   " autocmd BufWritePre *.exs call Indent()
+"   "
+"   " Sadly, I can't enable auto-indent for elixir because it messes up my heredoc
+"   " indentation for code sections and it has a couple of other issues :(
+"   autocmd BufNewFile,BufRead *.ex setlocal formatoptions=tcrq
+"   autocmd BufNewFile,BufRead *.exs setlocal formatoptions=tcrq
+" augroup END
 
 augroup elm
   autocmd!
@@ -305,15 +498,21 @@ augroup END
 
 augroup markdown
   autocmd!
-  autocmd FileType markdown setlocal textwidth=80
+  autocmd FileType markdown setlocal textwidth=100
   autocmd FileType markdown setlocal formatoptions=tcrq
+  autocmd FileType markdown setlocal spell spelllang=en
 augroup END
 
 augroup viml
   autocmd!
-  autocmd FileType vim setlocal textwidth=80
+  autocmd FileType vim setlocal textwidth=100
   autocmd FileType vim setlocal formatoptions=tcrq
 augroup END
+
+" augroup js
+"   autocmd BufWritePre *.js Neoformat
+" augroup END
+
 """"" End Filetypes ====================
 
 """"" Normalization ====================
@@ -346,22 +545,6 @@ nnoremap <silent> <BS> <C-w>h
   " Have to add this because hyperterm sends backspace for C-h
 
 " Navigate tabs with leader+h,l
-" It's hard to hit space and h/l simultaneously so increase the timeout for
-" space
 nnoremap <leader>h :tabprev<cr>
 nnoremap <leader>l :tabnext<cr>
-
 """ End Navigation ==================
-" --column: Show column number
-" --line-number: Show line number
-" --no-heading: Do not show file headings in results
-" --fixed-strings: Search term as a literal string
-" --ignore-case: Case insensitive search
-" --no-ignore: Do not respect .gitignore, etc...
-" --hidden: Search hidden files and folders
-" --follow: Follow symlinks
-" --glob: Additional conditions for search (in this case ignore everything in the .git/ folder)
-" --color: Search color options
-
-command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
-

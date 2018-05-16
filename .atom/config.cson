@@ -1,15 +1,21 @@
 "*":
+  "atom-beautify":
+    cs:
+      beautify_on_save: true
   autosave:
     enabled: true
+  "city-lights-ui": {}
   core:
     autoHideMenuBar: true
     telemetryConsent: "no"
     themes: [
-      "one-dark-ui"
+      "city-lights-ui"
       "solarized-dark-syntax"
     ]
     useTreeSitterParsers: true
   editor:
+    fontSize: 15
+    preferredLineLength: 120
     showInvisibles: true
     softWrap: true
     softWrapAtPreferredLineLength: true
@@ -17,5 +23,8 @@
     userId: "f2d97742-b9d3-424a-82b3-4984b5c40a10"
   tabs:
     enableVcsColoring: true
+  "tree-view": {}
   welcome:
     showOnStartup: false
+  zentabs:
+    maximumOpenedTabs: 10
