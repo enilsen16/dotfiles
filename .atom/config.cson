@@ -14,7 +14,6 @@
     ]
     useTreeSitterParsers: true
   editor:
-    fontSize: 15
     preferredLineLength: 120
     showInvisibles: true
     softWrap: true

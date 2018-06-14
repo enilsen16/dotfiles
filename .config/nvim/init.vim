@@ -29,7 +29,7 @@ set shiftwidth=2
 """ Format Options #format-options
 set formatoptions=tcrq
 set wrap
-set linebreak
+set nolist
 set textwidth=100
 
 """ Leader #leader
@@ -84,9 +84,13 @@ set undofile
 call plug#begin()
 
 """ Filetypes #filetypes
+Plug 'tpope/vim-endwise'
+Plug 'tpope/vim-sleuth'
 " Polyglot loads language support on demand!
 Plug 'sheerun/vim-polyglot'
-  let g:polyglot_disabled = ['elm']
+  let g:polyglot_disabled = ['elm', 'markdown']
+
+Plug 'plasticboy/vim-markdown', {'for': 'markdown'}
 
 " HTML / JS / CSS
 Plug 'othree/html5.vim'
@@ -96,15 +100,13 @@ Plug 'pangloss/vim-javascript'
 Plug 'mxw/vim-jsx'
   let g:jsx_ext_required = 0
 
-"Plug 'flowtype/vim-flow'
-Plug 'carlosrocha/vim-flow-plus'
-Plug 'wokalski/autocomplete-flow'
 " For func argument completion
 Plug 'Shougo/neosnippet'
 Plug 'Shougo/neosnippet-snippets'
 " Automatically imports missing JS dependencies and removes unused ones.
 Plug 'karthikv/tradeship-vim'
 
+Plug 'dleonard0/pony-vim-syntax'
 " Elixir
 Plug 'elixir-lang/vim-elixir'
 Plug 'slashmili/alchemist.vim'
@@ -112,11 +114,6 @@ Plug 'slashmili/alchemist.vim'
 """ Add support for ANSI colors - this has variously been necessary and caused
 """ problems, no clue what's up there...
 Plug 'powerman/vim-plugin-AnsiEsc'
-
-" sh
-" Plug 'z0mbix/vim-shfmt', { 'for': 'sh' }
-"   let g:shfmt_fmt_on_save = 1
-"   let g:shfmt_extra_args = '-i 2'
 
 " Phoenix
 Plug 'c-brenn/phoenix.vim'
@@ -154,18 +151,6 @@ Plug 'milkypostman/vim-togglelist'
 Plug 'sbdchd/neoformat'
 
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  let g:deoplete#enable_at_startup = 1
-  let g:deoplete#sources = {}
-  let g:deoplete#sources._ = ['file', 'neosnippet']
-  let g:deoplete#omni#functions = {}
-  let g:deoplete#omni#input_patterns = {}
-
-  " Elm support
-  " h/t https://github.com/ElmCast/elm-vim/issues/52#issuecomment-264161975
-  let g:deoplete#sources.elm = ['omni'] + g:deoplete#sources._
-  let g:deoplete#omni#functions.elm = ['elm#Complete']
-  let g:deoplete#omni#input_patterns.elm = '[^ \t]+'
-  let g:deoplete#disable_auto_complete = 1
 
 Plug 'ervandew/supertab'
 
@@ -214,9 +199,6 @@ Plug 'w0rp/ale'
   " \       'eslint',
   " \   ],
   " \}
-
-" Coala integration
-"Plug 'coala/coala-vim'
 
 " git support from dat tpope
 Plug 'tpope/vim-fugitive'
@@ -273,60 +255,16 @@ Plug 'vim-airline/vim-airline-themes'
   let g:airline#extensions#ale#enabled = 1
 
 """ Code Navigation #code-navigation
-" fzf fuzzy finder
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
-  let g:fzf_layout = { 'window': 'enew' }
-  nnoremap <silent> <C-P> :FZF<cr>
-  nnoremap <silent> <leader>a :Ag<cr>
-  augroup localfzf
-    autocmd!
-    autocmd FileType fzf :tnoremap <buffer> <C-J> <C-J>
-    autocmd FileType fzf :tnoremap <buffer> <C-K> <C-K>
-    autocmd VimEnter * command! -bang -nargs=* Ag
-      \ call fzf#vim#ag(<q-args>,
-      \                 <bang>0 ? fzf#vim#with_preview('up:60%')
-      \                         : fzf#vim#with_preview('right:50%:hidden', '?'),
-      \                 <bang>0)
-  augroup END
+  let g:fzf_buffers_jump = 1
+  imap <c-x><c-k> <plug>(fzf-complete-word)
+  imap <c-x><c-f> <plug>(fzf-complete-path)
+  imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+  imap <c-x><c-l> <plug>(fzf-complete-line)
 
 " Open files where you last left them
 Plug 'dietsche/vim-lastplace'
-
-" Execute code checks, find mistakes, in the background
-" Plug 'neomake/neomake'
-"   " Run Neomake when I save any buffer
-"   augroup localneomake
-"     autocmd! BufWritePost * Neomake
-"   augroup END
-"   " Don't tell me to use smartquotes in markdown ok?
-"   let g:neomake_markdown_enabled_makers = []
-"
-"   " Configure a nice credo setup, courtesy https://github.com/neomake/neomake/pull/300
-"   let g:neomake_elixir_enabled_makers = ['mix', 'mycredo']
-"   function! NeomakeCredoErrorType(entry)
-"     if a:entry.type ==# 'F'      " Refactoring opportunities
-"       let l:type = 'W'
-"     elseif a:entry.type ==# 'D'  " Software design suggestions
-"       let l:type = 'I'
-"     elseif a:entry.type ==# 'W'  " Warnings
-"       let l:type = 'W'
-"     elseif a:entry.type ==# 'R'  " Readability suggestions
-"       let l:type = 'I'
-"     elseif a:entry.type ==# 'C'  " Convention violation
-"       let l:type = 'W'
-"     else
-"       let l:type = 'M'           " Everything else is a message
-"     endif
-"     let a:entry.type = l:type
-"   endfunction
-"
-"   let g:neomake_elixir_mycredo_maker = {
-"         \ 'exe': 'mix',
-"         \ 'args': ['credo', 'list', '%:p', '--format=oneline'],
-"         \ 'errorformat': '[%t] %. %f:%l:%c %m,[%t] %. %f:%l %m',
-"         \ 'postprocess': function('NeomakeCredoErrorType')
-"         \ }
 
 " Easily manage tags files
 Plug 'ludovicchabant/vim-gutentags'
@@ -347,6 +285,8 @@ Plug 'scrooloose/nerdtree'
   autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | endif
 
 Plug 'Xuyuanp/nerdtree-git-plugin'
+
+Plug 'airblade/vim-rooter'
 
 call plug#end()
 
@@ -421,6 +361,13 @@ map ,, <C-^>
 
 " Makes foo-bar considered one word
 set iskeyword+=-
+
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=auto '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \ <bang>0)
 
 """ Auto Commands ====================== #auto-cmd
 
@@ -499,7 +446,7 @@ augroup END
 augroup markdown
   autocmd!
   autocmd FileType markdown setlocal textwidth=100
-  autocmd FileType markdown setlocal formatoptions=tcrq
+  autocmd FileType markdown setlocal formatoptions=
   autocmd FileType markdown setlocal spell spelllang=en
 augroup END
 
