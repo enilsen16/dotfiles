@@ -106,7 +106,8 @@ Plug 'Shougo/neosnippet-snippets'
 " Automatically imports missing JS dependencies and removes unused ones.
 Plug 'karthikv/tradeship-vim'
 
-Plug 'dleonard0/pony-vim-syntax'
+Plug 'jakwings/vim-pony'
+
 " Elixir
 Plug 'elixir-lang/vim-elixir'
 Plug 'slashmili/alchemist.vim'
