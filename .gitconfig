@@ -30,3 +30,6 @@
 	default = simple
 [core]
 	excludesfile = ~/.gitignore
+	editor = nvim
+[http]
+	cookiefile = /home/e/.gitcookies
