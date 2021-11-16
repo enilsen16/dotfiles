@@ -33,16 +33,15 @@ set undofile
 " Plugins
 call plug#begin()
 
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'airblade/vim-rooter'
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-  let g:deoplete#enable_at_startup = 1
+" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+"   let g:deoplete#enable_at_startup = 1
 Plug 'Shougo/neco-syntax'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'jakwings/vim-pony'
 Plug 'sheerun/vim-polyglot'
 Plug 'iCyMind/NeoSolarized'
-Plug 'tpope/vim-vinegar'
 Plug 'airblade/vim-gitgutter'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
@@ -64,6 +63,7 @@ Plug 'tpope/vim-projectionist'
 Plug 'dietsche/vim-lastplace'
 Plug 'tomtom/tcomment_vim'
 Plug 'tpope/vim-speeddating'
+Plug 'tpope/vim-vinegar'
 
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
